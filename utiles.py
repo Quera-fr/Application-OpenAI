@@ -1,5 +1,59 @@
 from openai import OpenAI
 
+import base64
+import requests
+
+
+def create_variation_with_openai(bytes_data, api_key):
+            client = OpenAI(api_key=api_key)
+
+            response = client.images.create_variation(
+            image=bytes_data,
+            n=1,
+            size="1024x1024"
+            )
+            return response.data[0].url
+
+
+def analyse_img_by_gpt(bytes_data, api_key):
+
+        base64_image = base64.b64encode(bytes_data).decode('utf-8')
+        headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}"
+        }
+
+        payload = {
+        "model": "gpt-4o-mini",
+        "messages": [
+            {
+            "role": "user",
+            "content": [
+                {
+                "type": "text",
+                "text": "What’s in this image?"
+                },
+                {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{base64_image}",
+                    "detail": "high"
+                }
+                }
+            ]
+            }
+        ],
+        "max_tokens": 300
+        }
+
+        response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+
+        return response.json()['choices'][0]['message']['content']
+
+def doanload_image(url_img, img_name):
+    img = requests.get(url_img).content
+    with open(img_name, 'wb') as handler:
+        handler.write(img)
 
 class Proccessing:
     def trad_with_openai(self, prompt, openai_key):
@@ -61,3 +115,18 @@ class Proccessing:
 
     def code_corector(self, prompt:str, openai_key)->str:
         return True
+    
+
+def generate_with_openai(prompt, api_key):
+        client = OpenAI(
+                            api_key=api_key,
+                        )
+        response = client.images.generate(
+        model="dall-e-3",
+        prompt=prompt,
+        size="1024x1024",
+        quality="standard",
+        n=1,
+        )
+
+        return response.data[0].url
