@@ -4,6 +4,29 @@ import base64
 import requests
 
 
+
+def speech_to_text(audio:bytes, api_key:str) ->str:
+        
+        client = OpenAI(api_key=api_key)
+
+        transcription =  client.audio.translations.create(
+        model="whisper-1",
+        file=audio
+        )
+
+        return transcription.text
+
+def text_to_speech(transcription:str, api_key:str) -> bytes:
+        client = OpenAI( api_key=api_key)
+        
+        audio_speech = client.audio.speech.create(
+                    model="tts-1",
+                    voice="fable",
+                    input=transcription
+                    )
+        return audio_speech.content
+
+
 def create_variation_with_openai(bytes_data, api_key):
             client = OpenAI(api_key=api_key)
 
