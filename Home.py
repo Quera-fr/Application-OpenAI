@@ -1,64 +1,71 @@
 import streamlit as st
+from utiles import page
 
-# Page configuration
-st.set_page_config(
-    page_title="Dawan - AppWeb",
-    page_icon="🧊",
-    layout="centered",
-    initial_sidebar_state="auto",
-)
+# Configuration de la page
+page(title="Présentation des Fonctionnalités de Streamlit")
 
-# Configure the title of the page
-st.title("Dawan - AppWeb")
+# Titre de la page
+st.title("Présentation de Streamlit")
 
-# Subtitle
-st.subheader("Subtitle")
+# Sous-titre
+st.subheader("Explorez les principales fonctionnalités")
 
-
-# Text
+# Introduction
 st.write("""
+Streamlit est un framework Python qui permet de créer des applications web interactives simplement et rapidement. 
+Voici un aperçu des principales fonctionnalités que vous pouvez utiliser dans vos applications Streamlit :
+""")
 
-this is a code block
-         ```python
-        import streamlit as st
-        st.title("Dawan - AppWeb")
-            ```
-         """)
+# Exemple de code
+st.write("""
+### Exemple de code avec Streamlit
+Vous pouvez utiliser du code Python pour créer des interfaces utilisateurs dynamiques. Par exemple :
+```python
+import streamlit as st
+st.title("Ma première application Streamlit")
+```
+""")
 
-# Input field
-prompt = st.text_input("Enter your name", "Type Here ...")
+# Champ de saisie
+nom = st.text_input("Entrez votre nom", "Tapez ici...")
 
-# Add Boutton
-if st.button("Simple Button"):
-    st.write(prompt)
-
+# Bouton interactif
+if st.button("Afficher le nom"):
+    st.write(f"Bonjour, {nom} !")
 
 # Slider
-age = st.slider("Quel est votre age ?", 0, 100, 25)
-
+age = st.slider("Quel est votre âge ?", 0, 100, 25)
+st.write(f"Votre âge est de {age} ans.")
 
 # Checkbox
-if st.checkbox("Show/Hide"):
-    st.write("Showing or Hiding widget")
+if st.checkbox("Afficher plus d'informations"):
+    st.write("Streamlit permet également d'ajouter des widgets interactifs comme les cases à cocher, les boutons, etc.")
 
-
+# Colonnes
 col1, col2 = st.columns(2)
 
 with col1:
-    # Selectbox
-    st.selectbox("Sélectionnez votre langue : ", ["Français", "Anglais", "Espagnol"])
+   # Image
+    st.image("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmrJJS51aimdKyh_eNLrzG21MzoVOYgoHeUQ&s")
     
+
 with col2:
-    # Video
+    # Vidéo YouTube
     st.video("https://www.youtube.com/watch?v=GsZhStn1OgI")
 
-st.sidebar.title("Sidebar")
-st.sidebar.image("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmrJJS51aimdKyh_eNLrzG21MzoVOYgoHeUQ&s")
+# Sidebar
+st.sidebar.title("Fonctionnalités supplémentaires")
+st.sidebar.write("Explorez les options dans la barre latérale pour plus de contenus.")
 
+ # Selectbox
+langue = st.sidebar.selectbox("Sélectionnez votre langue : ", ["Français", "Anglais", "Espagnol"])
+st.sidebar.write(f"Langue sélectionnée : {langue}")
 
-st.write("""It seems like there is an error in the code provided. If you intended to print the word "Hello", the correct syntax in Python would be `print("Hello")`. Here is the corrected version:
-
+# Section de code avec explication
+st.write("""
+### Correction d'erreur courante :
+Si vous souhaitez afficher "Hello" en Python, utilisez la commande suivante :
 ```python
 print("Hello")
 ```
-         """)
+""")

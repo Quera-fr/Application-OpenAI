@@ -1,49 +1,80 @@
+import base64, requests
 from openai import OpenAI
+import streamlit as st
 
-import base64
-import requests
+def page(title="Présentation des Fonctionnalités de Streamlit"):
+    return st.set_page_config(
+        page_title=title,
+        page_icon="📊",
+        layout="centered",
+        initial_sidebar_state="auto",
+    )
 
 
+class PromptEngineering:
+    def __init__(self, api_key:str):
+        self.api_key = api_key
+        self.client = OpenAI(api_key=api_key)
 
-def speech_to_text(audio:bytes, api_key:str) ->str:
+    @staticmethod
+    def doanload_image(self, url_img, img_name):
+        img = requests.get(url_img).content
+        with open('./tmps/'+img_name, 'wb') as handler:
+            handler.write(img)
+
+    def use_finetuned_model(self, model:str, prompt="What can yo do for me ?") -> str:
+        return self.client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ]
+            ).choices[0].message.content
+
+    def fine_tuning(self, bytes_data:bytes, name_suffix='Quera-model', model="gpt-4o-2024-08-06") -> str:
+        upload_file = self.client.files.create(
+            file=bytes_data,
+            purpose="fine-tune"
+            )
+        try:
+            fine_tuned_model = self.client.fine_tuning.jobs.create(
+                training_file=upload_file.id,
+                model=model,
+                suffix=name_suffix
+                )
+            return fine_tuned_model.id
+        except:
+            return "Erreur lors de l'entrainement du modèle"
         
-        client = OpenAI(api_key=api_key)
+    def show_models(self, nb=10) -> dict:
+        return {self.client.fine_tuning.jobs.list(limit=10).to_dict()['data'][n]['fine_tuned_model']:
+                self.client.fine_tuning.jobs.list(limit=nb).to_dict()['data'][n]['status'] for n in range(10)}
 
-        transcription =  client.audio.translations.create(
-        model="whisper-1",
-        file=audio
-        )
+    def speech_to_text(self, audio:bytes) ->str:
+        return self.client.audio.translations.create(
+            model="whisper-1",
+            file=audio
+            ).text
 
-        return transcription.text
+    def text_to_speech(self, transcription:str) -> bytes:
+        return self.client.audio.speech.create(
+            model="tts-1",
+            voice="fable",
+            input=transcription
+            ).content
 
-def text_to_speech(transcription:str, api_key:str) -> bytes:
-        client = OpenAI( api_key=api_key)
-        
-        audio_speech = client.audio.speech.create(
-                    model="tts-1",
-                    voice="fable",
-                    input=transcription
-                    )
-        return audio_speech.content
-
-
-def create_variation_with_openai(bytes_data, api_key):
-            client = OpenAI(api_key=api_key)
-
-            response = client.images.create_variation(
+    def create_variation_with_openai(self, bytes_data:bytes) -> str:
+        return self.client.images.create_variation(
             image=bytes_data,
             n=1,
             size="1024x1024"
-            )
-            return response.data[0].url
+            ).data[0].url
 
-
-def analyse_img_by_gpt(bytes_data, api_key):
-
+    def analyse_img_by_gpt(self, bytes_data:bytes) -> str:
         base64_image = base64.b64encode(bytes_data).decode('utf-8')
         headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}"
+        "Authorization": f"Bearer {self.api_key}"
         }
 
         payload = {
@@ -70,22 +101,12 @@ def analyse_img_by_gpt(bytes_data, api_key):
         }
 
         response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
-
+        
         return response.json()['choices'][0]['message']['content']
-
-def doanload_image(url_img, img_name):
-    img = requests.get(url_img).content
-    with open(img_name, 'wb') as handler:
-        handler.write(img)
-
-class Proccessing:
-    def trad_with_openai(self, prompt, openai_key):
-
-        client = OpenAI(api_key=openai_key)
-        chat_completion = client.chat.completions.create(
-            messages=[
-                
-        {
+    
+    def trad_with_openai(self, prompt:str) -> str:
+        chat_completion = self.client.chat.completions.create(
+            messages=[{
             "role": "system",
             "content": "Tu es un traducteur qui traduit de l'anglais au français."
         },
@@ -125,31 +146,26 @@ class Proccessing:
             "role": "user",
             "content": prompt
         },
-            ],
-            model="gpt-3.5-turbo",
-            temperature=0.3,
-            max_tokens=100,
-            top_p=1.0,
-            frequency_penalty=0.0,
-            presence_penalty=0.0
+        ],
+        model="gpt-3.5-turbo",
+        temperature=0.3,
+        max_tokens=100,
+        top_p=1.0,
+        frequency_penalty=0.0,
+        presence_penalty=0.0
         )
 
         return chat_completion.choices[0].message.content
 
-    def code_corector(self, prompt:str, openai_key)->str:
+    def code_corector(self, prompt:str)->str:
         return True
-    
+        
 
-def generate_with_openai(prompt, api_key):
-        client = OpenAI(
-                            api_key=api_key,
-                        )
-        response = client.images.generate(
-        model="dall-e-3",
-        prompt=prompt,
-        size="1024x1024",
-        quality="standard",
-        n=1,
-        )
-
-        return response.data[0].url
+    def generate_with_openai(self, prompt:str, model="dall-e-3") -> str:
+        return self.client.images.generate(
+            model=model,
+            prompt=prompt,
+            size="1024x1024",
+            quality="standard",
+            n=1,
+            ).data[0].url
