@@ -16,7 +16,6 @@ class PromptEngineering:
         self.api_key = api_key
         self.client = OpenAI(api_key=api_key)
 
-    @staticmethod
     def doanload_image(self, url_img, img_name):
         img = requests.get(url_img).content
         with open('./tmps/'+img_name, 'wb') as handler:
